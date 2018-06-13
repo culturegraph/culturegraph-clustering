@@ -61,14 +61,14 @@ TIP: For large problem instances, you need to tweak the JVM Memory option `-Xmx`
 
 Usage of the command line client.
 
-```
+----
 Usage:
 
-<main class> [-chV] -o=OUTPUT [-s=NUM] INPUT
+<main class> [-chV] -o=FILE [-s=NUM] INPUT
 
 Description:
 
-Clusters a bipartite-graph by its connected components.
+Partitions a bipartite-graph into connected components.
 
 Parameters:
 
@@ -76,13 +76,13 @@ Parameters:
 
 Options:
 
-  -o, --output=OUTPUT         Output node-cluster-mapping.
+  -o, --output=FILE           Output file for node-cluster-mapping.
   -c                          Compress output with gzip.
   -s, --size=NUM              Minimum component size.
                                 Default: 0
   -h, --help                  Display this help message.
   -V, --version               Display version info.
-```
+----
 
 == Good To Know
 
