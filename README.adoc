@@ -43,7 +43,7 @@ C f
 ----
 
 ----
-java -Xmx1G -jar cluster-cli-VERSION.jar -i graph.txt -o mapping.txt
+java -Xmx1G -jar clustering-cli-VERSION.jar -i graph.txt -o mapping.txt
 ----
 
 The resulting mapping tags each parent node with an number.
