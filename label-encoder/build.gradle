@@ -1,0 +1,4 @@
+dependencies {
+    implementation project(':io')
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
+}

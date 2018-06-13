@@ -1,0 +1,110 @@
+= culturegraph-clustering
+:TOC:
+
+A implementation of the graph clustering method used in culturegraph.
+
+The input problem is encoded as a bipartite input graph.
+A cluster is defined as a connected component in this input graph.
+
+A bipartite graph __G(U,V)__ is represented by two node sets (namely __U__ and __V__).
+We represent the bipartite graph with an adjacency list, that lists all
+children for each parent (assuming a digraph).
+
+Although the used bipartite graph is undirected, we refer to the node set __U__ with __"Parent Node Set"__ and
+to the node set __V__ with __"Child Node Set"__.
+
+== Installation
+
+=== Requirements
+
+- Java 8 or later
+
+=== Build CLI
+
+Run the following command to construct a jar with dependencies.
+
+----
+gradlew test fatJar
+----
+
+== Command Line Client
+
+=== Example
+
+The input file describes a adjacency list, where each line starts with a parent node, followed by its child nodes.
+Parent and child nodes belong to distinct sets of nodes that only share connections between each other.
+
+----
+% File: graph.txt
+% Schema: PARENT CHILD [... CHILD]
+A a b c
+B a
+C f
+----
+
+----
+java -Xmx1G -jar cluster-cli-VERSION.jar -i graph.txt -o mapping.txt
+----
+
+The resulting mapping tags each parent node with an number.
+All nodes that share the same number form a cluster.
+
+----
+A 1
+B 1
+C 2
+----
+
+TIP: For large problem instances, you need to tweak the JVM Memory option `-Xmx`.
+
+=== Usage
+
+Usage of the command line client.
+
+```
+Usage:
+
+<main class> [-chV] -o=OUTPUT [-s=NUM] INPUT
+
+Description:
+
+Clusters a bipartite-graph by its connected components.
+
+Parameters:
+
+      INPUT                   Input adjacency list (plain text or gzip).
+
+Options:
+
+  -o, --output=OUTPUT         Output node-cluster-mapping.
+  -c                          Compress output with gzip.
+  -s, --size=NUM              Minimum component size.
+                                Default: 0
+  -h, --help                  Display this help message.
+  -V, --version               Display version info.
+```
+
+== Good To Know
+
+- The input adjacency list should only contain unique lines.
+- If a connected component does not reaches the __minimum component size__, each parent node in this component is
+assigned to the component "__-1__".
+
+=== Temporary Files
+
+The procedure creates the following temporary files during a run.
+
+.Table Temporary Files
+|===
+|Name | Description
+
+| childNodeHashes.tmp
+| A list of uniques hashes for each unique child node label.
+
+| encodedInput.tmp
+| A encoded representation of the input adjacency list, where each node label is mapped to a unique numerical identifier.
+
+| encodedParentNodes.tmp
+| A label to number mapping for each parent node.
+
+|===
