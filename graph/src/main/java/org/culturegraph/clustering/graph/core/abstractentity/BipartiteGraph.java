@@ -1,12 +1,14 @@
 package org.culturegraph.clustering.graph.core.abstractentity;
 
-import org.culturegraph.clustering.graph.core.entity.GraphHeader;
-
-import java.util.*;
-
+import com.opencsv.CSVParser;
+import com.opencsv.CSVParserBuilder;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import org.culturegraph.clustering.graph.core.entity.GraphHeader;
+
+import java.io.IOException;
+import java.util.*;
 
 /**
  * Class that represents a bipartite graph.
@@ -78,6 +80,8 @@ public class BipartiteGraph {
         String commentSymbol = "%";
         String headerSymbol = "#";
 
+        CSVParser parser = new CSVParserBuilder().withSeparator(' ').build();
+
         while (input.hasNext())
         {
             String line = input.next();
@@ -101,21 +105,31 @@ public class BipartiteGraph {
                 continue;
             }
 
-            if (!hasHeader) {
+            if (!hasHeader)
+            {
                 throw new NoSuchElementException("Missing header. Expected '# <ROWS> <COLUMNS> <NON-ZERO-ENTRIES>'.");
             }
 
-            StringTokenizer tokenizer = new StringTokenizer(line, " ");
-            int numberOfToken = tokenizer.countTokens();
+            String[] token;
 
-            String firstNumber = tokenizer.nextToken();
+            try
+            {
+                token = parser.parseLine(line);
+            }
+            catch (IOException e)
+            {
+                throw new IllegalArgumentException("Could not parse line " + "'" + line + "'", e);
+            }
+
+            int numberOfToken = token.length;
+
+            String firstNumber = token[0];
             int rowIdx = Integer.parseInt(firstNumber);
 
             int startWithZero = -1;
             int numberOfNodeNeighbours = numberOfToken - 1;
-            while (tokenizer.hasMoreTokens()) {
-                String followingNumber = tokenizer.nextToken();
-
+            for (int i = 1; i < numberOfToken; i++) {
+                String followingNumber = token[i];
                 val[capacity] = rowIdx;
                 colInd[capacity] = Integer.parseInt(followingNumber) + startWithZero;
                 capacity += 1;
