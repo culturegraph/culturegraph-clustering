@@ -19,7 +19,10 @@ to the node set __V__ with __"Child Node Set"__.
 
 - Java 8 or later
 
-=== Build CLI
+=== Build
+
+image::https://jitpack.io/v/eberhardtj/culturegraph-clustering.svg[link="https://jitpack.io/#eberhardtj/culturegraph-clustering"]
+
 
 Run the following command to construct a jar with dependencies.
 
