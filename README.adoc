@@ -29,6 +29,15 @@ Run the following command to construct a jar with dependencies.
 gradlew test fatJar
 ----
 
+=== Script
+
+The `scripts` folder contains the Groovy Script `GraphCluster.groovy` that provides a simple CLI wrapper.
+The script uses Groovy's link:http://docs.groovy-lang.org/latest/html/documentation/grape.html[Grape] dependency management to download all dependencies and functions standalone.
+
+You just need to install link:http://groovy-lang.org/[Groovy 2.5.0].
+
+Run `scripts/GraphCluster.groovy -h` for more details.
+
 == Command Line Client
 
 === Example
