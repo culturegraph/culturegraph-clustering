@@ -23,7 +23,6 @@ to the node set __V__ with __"Child Node Set"__.
 
 image::https://jitpack.io/v/eberhardtj/culturegraph-clustering.svg[link="https://jitpack.io/#eberhardtj/culturegraph-clustering"]
 
-
 Run the following command to construct a jar with dependencies.
 
 ----
@@ -37,16 +36,16 @@ gradlew test fatJar
 The input file describes a adjacency list, where each line starts with a parent node, followed by its child nodes.
 Parent and child nodes belong to distinct sets of nodes that only share connections between each other.
 
+The file `graph.txt` represent a graph as a adjacency list has the schema `PARENT CHILD [... CHILD]` for each line:
+
 ----
-% File: graph.txt
-% Schema: PARENT CHILD [... CHILD]
 A a b c
 B a
 C f
 ----
 
 ----
-java -Xmx1G -jar clustering-cli-VERSION.jar -i graph.txt -o mapping.txt
+java -Xmx1G -jar clustering-cli-VERSION.jar -o mapping.txt graph.txt
 ----
 
 The resulting mapping tags each parent node with an number.
