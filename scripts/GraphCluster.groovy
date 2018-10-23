@@ -17,7 +17,7 @@
  * Groovy: Version 2.5.0
  */
 @GrabResolver(name='jitpack', root='https://jitpack.io')
-@Grab('com.github.eberhardtj:culturegraph-clustering:v0.2.0')
+@Grab('com.github.culturegraph:culturegraph-clustering:v0.2.0')
 
 import groovy.cli.picocli.CliBuilder
 import org.culturegraph.clustering.algorithm.core.Algorithm
