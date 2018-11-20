@@ -1,6 +1,9 @@
 package org.culturegraph.clustering.graph.core.abstractentity;
 
-import java.util.ArrayList;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+
+import java.util.Arrays;
 
 /**
  * A container class for a CRS matrix.
@@ -52,8 +55,8 @@ public class CRSMatrix {
      * @param row A row index.
      * @return A list of row elements.
      */
-    public ArrayList<Integer> getRow(int row) {
-        ArrayList<Integer> result = new ArrayList<>();
+    public TIntList getRow(int row) {
+        TIntList result = new TIntArrayList();
         int start = rowPtr[row];
         int end = rowPtr[row+1];
         for (int i = 0; i < end - start; i++) {
