@@ -1,12 +1,18 @@
 package org.culturegraph.clustering.graph.core.abstractentity;
 
-import java.io.*;
+import gnu.trove.set.TIntSet;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 import java.util.stream.Collectors;
 
-import gnu.trove.set.TIntSet;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -29,10 +35,6 @@ public class BipartiteGraphTest {
         assertTrue(component.contains(3));
 
         assertFalse(components.hasNext());
-
-        Writer w = new BufferedWriter(new OutputStreamWriter(System.err));
-        graph.exportAsGraphML(w);
-        w.close();
     }
 
     @Test
@@ -51,10 +53,6 @@ public class BipartiteGraphTest {
         assertTrue(component.contains(3));
 
         assertFalse(components.hasNext());
-
-        Writer w = new BufferedWriter(new OutputStreamWriter(System.err));
-        graph.exportAsGraphML(w);
-        w.close();
     }
 
     @Test
@@ -73,10 +71,6 @@ public class BipartiteGraphTest {
         assertTrue(component.contains(3));
 
         assertFalse(components.hasNext());
-
-        Writer w = new BufferedWriter(new OutputStreamWriter(System.err));
-        graph.exportAsGraphML(w);
-        w.close();
     }
 
     @Test
@@ -95,10 +89,6 @@ public class BipartiteGraphTest {
         assertTrue(component.contains(3));
 
         assertFalse(components.hasNext());
-
-        Writer w = new BufferedWriter(new OutputStreamWriter(System.err));
-        graph.exportAsGraphML(w);
-        w.close();
     }
 
     @Test
@@ -120,10 +110,6 @@ public class BipartiteGraphTest {
         assertTrue(component2.contains(1));
 
         assertFalse(components.hasNext());
-
-        Writer w = new BufferedWriter(new OutputStreamWriter(System.err));
-        graph.exportAsGraphML(w);
-        w.close();
     }
 
     @Test
