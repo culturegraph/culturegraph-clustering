@@ -272,4 +272,41 @@ public class BipartiteGraph {
         }
         return result;
     }
+
+    public Iterator<TIntSet> iterator() {
+        return new ComponentIterator();
+    }
+
+    private class ComponentIterator implements Iterator<TIntSet> {
+
+        private boolean[] visited;
+        private int row;
+
+        public ComponentIterator() {
+            this.visited= new boolean[rows];
+            for (int i = 0; i < visited.length; i++) visited[i] = false;
+            this.row = 0;
+        }
+
+        @Override
+        public boolean hasNext() {
+            while (visited[row]) {
+                row += 1;
+                if (row == rows) break;
+            }
+            return row < rows;
+        }
+
+        @Override
+        public TIntSet next() {
+            TIntSet bfs = breadthFirstSearch(row);
+            TIntIterator intIterator = bfs.iterator();
+            while (intIterator.hasNext())
+            {
+                int elem = intIterator.next();
+                visited[elem] = true;
+            }
+            return bfs;
+        }
+    }
 }
