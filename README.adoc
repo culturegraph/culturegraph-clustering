@@ -49,7 +49,7 @@ Compute the connected components:
 
 [source,bash]
 ----
-java -Xmx1G -jar clustering-cli-VERSION.jar -o mapping.txt graph.txt
+java -Xmx1G -jar clustering-cli-VERSION.jar -o output.graphml graph.txt
 ----
 
 TIP: For large problem instances, you need to tweak the JVM Memory option `-Xmx`.
@@ -83,14 +83,14 @@ Graph visualization (made with link:https://gephi.org/[Gephi]):
 
 image::assets/example-graph.png[Graph Visualization]
 
-The result graphml file contains a component number for each node *v* in *V* .
+The result GraphML file contains a component number for each node *v* in *V* .
 All nodes that share the same component number form a cluster.
 
 You may extract the node to component mapping with:
 
 [source,bash]
 ----
-cat g.graphml | grep "^<node" | sed -n 's:.*<data.*>\(.*\)</data><data.*>\(.*\)</data>.*:\1 \2:p'
+cat output.graphml | grep "^<node" | sed -n 's:.*<data.*>\(.*\)</data><data.*>\(.*\)</data>.*:\1 \2:p'
 ----
 
 [source,csv]
