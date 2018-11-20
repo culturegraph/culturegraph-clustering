@@ -144,8 +144,13 @@ public class BipartiteGraph {
      *                  index in the adjacency matrix.
      * @return A set containing the the visited nodes that form a connected component.
      */
-    public TIntSet breathFirstSearch(int startNode)
+    public TIntSet breadthFirstSearch(int startNode)
     {
+        int noDepthLimit = -1;
+        return this.breadthFirstSearch(startNode, noDepthLimit);
+    }
+
+    public TIntSet breadthFirstSearch(int startNode, int maxDepth) {
         TIntSet visitedInNodeSetV = new TIntHashSet(100, 0.75f, -1);
 
         TIntSet visitedInNodeSetU = new TIntHashSet(100, 0.75f, -1);
@@ -161,8 +166,13 @@ public class BipartiteGraph {
         queue.add(startNode);
         visitedInNodeSetV.add(startNode);
 
+        int depth = 0;
         while (!queue.isEmpty())
         {
+            if (maxDepth > -1 && depth >= maxDepth) {
+                break;
+            }
+
             // Fetch a row
             currentRowIdx = queue.remove();
 
@@ -171,8 +181,24 @@ public class BipartiteGraph {
             start = matrix.getRowPtr()[currentRowIdx];
             offset = matrix.getRowPtr()[currentRowIdx+1] - start;
 
+
+            boolean isDepthIncreased = false;
+
             for (int off = 0; off < offset; off++) {
-                for (int columnValue: matrix.getColumn(start+off))
+                int[] column = matrix.getColumn(start+off).toArray();
+
+                if (maxDepth > -1 && !isDepthIncreased) {
+                    for (int i = 0; i < column.length; i++) {
+                        int col = column[i];
+                        if (!visitedInNodeSetU.contains(col)) {
+                            isDepthIncreased = true;
+                            break;
+                        }
+                    }
+                    if (isDepthIncreased) depth += 1;
+                }
+
+                for (int columnValue: column)
                 {
                     if (visitedInNodeSetU.contains(columnValue))
                     {
@@ -231,7 +257,7 @@ public class BipartiteGraph {
                 continue;
             }
 
-            TIntSet bfs = breathFirstSearch(i);
+            TIntSet bfs = breadthFirstSearch(i);
             if (bfs.size() >= minSize)
             {
                 TIntIterator intIterator = bfs.iterator();
