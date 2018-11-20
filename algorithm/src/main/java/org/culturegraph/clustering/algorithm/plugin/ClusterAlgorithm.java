@@ -87,7 +87,7 @@ public class ClusterAlgorithm implements Algorithm
 
     private void countNodesAndCollectChildNodesHashes() throws IOException
     {
-        LOG.info("Counting nodes ...");
+        if (LOG.isInfoEnabled()) LOG.info("Counting nodes ...");
 
         try (InputStream inputStream = DecompressedInputStream.of(input))
         {
@@ -104,17 +104,19 @@ public class ClusterAlgorithm implements Algorithm
 
         matrixColumns = childNodesHashSet.size();
 
-        LOG.info("Parent Nodes: {}", matrixRows);
-        LOG.info("Child Nodes: {}", matrixNonZeroEntries);
-        LOG.info("Unique Child Nodes: {}", matrixColumns);
-        LOG.info("Counting nodes completed.");
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Parent Nodes: {}", matrixRows);
+            LOG.info("Child Nodes: {}", matrixNonZeroEntries);
+            LOG.info("Unique Child Nodes: {}", matrixColumns);
+            LOG.info("Counting nodes completed.");
+        }
     }
 
     private void saveChildNodeHashes() throws IOException, StepException
     {
         childNodesHashes = new CreateTemporaryFileStep("childNodesHashes").apply();
 
-        LOG.info("Saving child node hashes.");
+        if (LOG.isInfoEnabled()) LOG.info("Saving child node hashes.");
 
         try (OutputStream outputStream = CompressedOutputStream.of(childNodesHashes);
              OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8);
@@ -134,40 +136,40 @@ public class ClusterAlgorithm implements Algorithm
 
     private void deleteChildNodeHashes()
     {
-        LOG.info("Deleting child node hashes.");
+        if (LOG.isInfoEnabled()) LOG.info("Deleting child node hashes.");
 
         childNodesHashSet.clear();
         if (childNodesHashes.delete()) childNodesHashes.deleteOnExit();
 
-        LOG.info("Deleting child node hashes completed.");
+        if (LOG.isInfoEnabled()) LOG.info("Deleting child node hashes completed.");
     }
 
     private void createLabelEncoderForParentNodes()
     {
-        LOG.info("Creating parent node encoder.");
+        if (LOG.isInfoEnabled()) LOG.info("Creating parent node encoder.");
 
         parentNodeLabelEncoder = new EnumeratingLabelEncoder(0);
 
-        LOG.info("Creating parent node encoder completed.");
+        if (LOG.isInfoEnabled()) LOG.info("Creating parent node encoder completed.");
     }
 
     private void freeParentNodeLabelEncoder()
     {
-        LOG.debug("Freeing parent node label encoder.");
+        if (LOG.isDebugEnabled()) LOG.debug("Freeing parent node label encoder.");
 
         parentNodeLabelEncoder = null;
     }
 
     private void createTableForEncodedParentNodes() throws StepException
     {
-        LOG.debug("Creating file for encoded parent nodes.");
+        if (LOG.isDebugEnabled()) LOG.debug("Creating file for encoded parent nodes.");
 
         encodedParentNodes = new CreateTemporaryFileStep("encodedParentNodes").apply();
     }
 
     private void saveEncodedParentNodesIntoTable() throws IOException, ProcedureException
     {
-        LOG.info("Saving encoded parent nodes.");
+        if (LOG.isInfoEnabled()) LOG.info("Saving encoded parent nodes.");
 
         parentNodeLabelEncoder.reset();
 
@@ -181,12 +183,12 @@ public class ClusterAlgorithm implements Algorithm
             new WriteToOutputStreamProcedure(parentNodeLabels, CompressedOutputStream.of(encodedParentNodes)).apply();
         }
 
-        LOG.info("Saving encoded parent nodes completed.");
+        if (LOG.isInfoEnabled()) LOG.info("Saving encoded parent nodes completed.");
     }
 
     private void createAndPopulateChildNodeLabelEncoderFromChildNodeHashes() throws IOException
     {
-        LOG.info("Creating child node encoder.");
+        if (LOG.isInfoEnabled()) LOG.info("Creating child node encoder.");
 
         try (InputStream inputStream = DecompressedInputStream.of(childNodesHashes);
              InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
@@ -196,18 +198,18 @@ public class ClusterAlgorithm implements Algorithm
             childNodeLabelEncoder = ArrayLabelEncoder.fromHashIterator((int) matrixColumns, hashes);
         }
 
-        LOG.info("Creating child node encoder completed.");
+        if (LOG.isInfoEnabled()) LOG.info("Creating child node encoder completed.");
     }
 
     private void freeChildNodeLabelEncoder()
     {
-        LOG.debug("Free child node encoder");
+        if (LOG.isDebugEnabled()) LOG.debug("Free child node encoder");
         childNodeLabelEncoder = null;
     }
 
     private void relabelClusteringOutputWithTableForEncodedParentNodesAndWriteOutput() throws IOException
     {
-        LOG.info("Decoding output ...");
+        if (LOG.isInfoEnabled()) LOG.info("Decoding output ...");
 
         try (InputStream inputStream = DecompressedInputStream.of(encodedParentNodes);
              InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
@@ -228,46 +230,33 @@ public class ClusterAlgorithm implements Algorithm
                     break;
                 }
 
-                int clusterId = connectedComponents[nodeId];
-
-                EncodedNode encodedNode = encodedNodeIterator.next();
-
-                ClusteredNode clusteredNode = new ClusteredNode(encodedNode.getLabel(), clusterId);
-
-                if (nodeId == encodedNode.getId())
-                {
-                    output.write(clusteredNode.asString());
-                    output.newLine();
-                }
-            }
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Decoding output completed.");
+            LOG.info("Wrote output to \"{}\"", output.getName());
         }
-
-        LOG.info("Decoding output completed.");
-
-        LOG.info("Wrote output to \"{}\"", output.getName());
     }
 
     private void deleteTableForEncodedParentNodes()
     {
-        LOG.debug("Delete decoding table for parent node label encoder.");
+        if (LOG.isDebugEnabled()) LOG.debug("Delete decoding table for parent node label encoder.");
 
         if (!encodedParentNodes.delete()) encodedParentNodes.deleteOnExit();
     }
 
     private void createEncodedInput() throws StepException
     {
-        LOG.info("Encoding input...");
+        if (LOG.isInfoEnabled()) LOG.info("Encoding input...");
 
         encodedInput = new CreateTemporaryFileStep("encodedInput").apply();
     }
 
     private void appendHeaderToEncodedInput() throws IOException, ProcedureException
     {
-        LOG.info("Adding header ...");
+        if (LOG.isInfoEnabled()) LOG.info("Adding header ...");
 
         String header = "# " + matrixRows + " " + matrixColumns + " " + matrixNonZeroEntries;
 
-        LOG.debug("Encoded input header: {}", header);
+        if (LOG.isDebugEnabled()) LOG.debug("Encoded input header: {}", header);
 
         try (OutputStream appendOutputStream = new FileOutputStream(encodedInput, true))
         {
@@ -278,7 +267,7 @@ public class ClusterAlgorithm implements Algorithm
 
     private void appendEncodedAdjacencyListToEncodedInput() throws IOException, StepException
     {
-        LOG.info("Adding body ...");
+        if (LOG.isInfoEnabled()) LOG.info("Adding body ...");
 
         parentNodeLabelEncoder.reset();
 
@@ -309,12 +298,12 @@ public class ClusterAlgorithm implements Algorithm
             new WriteToOutputStreamProcedure(encodedAdjacencyListStream, CompressedOutputStream.of(appendOutputStream)).apply();
         }
 
-        LOG.info("Encoding input completed.");
+        if (LOG.isInfoEnabled()) LOG.info("Encoding input completed.");
     }
 
     private void deleteEncodedInput()
     {
-        LOG.debug("Deleting encoded input ...");
+        if (LOG.isDebugEnabled()) LOG.debug("Deleting encoded input ...");
 
         encodedInput.delete();
         encodedInput.deleteOnExit();
@@ -322,7 +311,7 @@ public class ClusterAlgorithm implements Algorithm
 
     private void loadEncodedInputIntoGraph() throws IOException
     {
-        LOG.info("Creating graph instance ...");
+        if (LOG.isInfoEnabled()) LOG.info("Creating graph instance ...");
 
         try (InputStream inputStream = DecompressedInputStream.of(encodedInput);
              InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
@@ -332,15 +321,15 @@ public class ClusterAlgorithm implements Algorithm
             graph = BipartiteGraph.fromAdjacencyList(encodedInputIterator);
         }
 
-        LOG.info("Creating graph instance completed.");
+        if (LOG.isInfoEnabled()) LOG.info("Creating graph instance completed.");
     }
 
     private void computeClustering()
     {
-        LOG.info("Computing clustering ...");
+        if (LOG.isInfoEnabled()) LOG.info("Computing clustering ...");
 
         connectedComponents = graph.findAllConnectedComponents(minimumComponentSize);
 
-        LOG.info("Computing clustering completed.");
+        if (LOG.isInfoEnabled()) LOG.info("Computing clustering completed.");
     }
 }
