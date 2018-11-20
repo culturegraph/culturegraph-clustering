@@ -40,9 +40,11 @@ public class Main
 
     private Boolean run(ClusterCommand args)
     {
-        LOG.info("Input: {}", args.inputAdjacencyList.getName());
-        LOG.info("Output: {} (Compressed: {})", args.outputMapping.getName(), args.compressOutput ? "yes" : "no");
-        LOG.info("Minimum Component Size: {} {}", args.minimumComponentSize, args.minimumComponentSize == 0 ? "(Default)" : "");
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Input: {}", args.inputAdjacencyList.getName());
+            LOG.info("Output: {} (Compressed: {})", args.outputMapping.getName(), args.compressOutput ? "yes" : "no");
+            LOG.info("Minimum Component Size: {} {}", args.minimumComponentSize, args.minimumComponentSize == 0 ? "(Default)" : "");
+        }
 
         Algorithm clusterAlgorithm = new ClusterAlgorithm(
                 args.inputAdjacencyList,
@@ -56,12 +58,14 @@ public class Main
             long start_ms = System.currentTimeMillis();
             clusterAlgorithm.run();
             long elapsed_ms = System.currentTimeMillis() - start_ms;
-            LOG.info("Algorithm completed in {}", prettyPrintTime(elapsed_ms));
+            if (LOG.isInfoEnabled()) LOG.info("Algorithm completed in {}", prettyPrintTime(elapsed_ms));
         }
         catch (Exception e)
         {
-            LOG.error("{}", e);
-            LOG.error("Execution failed.");
+            if (LOG.isErrorEnabled()) {
+                LOG.error("{}", e);
+                LOG.error("Execution failed.");
+            }
             return false;
         }
 
