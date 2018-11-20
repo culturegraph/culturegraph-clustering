@@ -1,25 +1,42 @@
 package org.culturegraph.clustering.algorithm.plugin;
 
-import java.io.*;
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.iterator.TLongIterator;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TLongHashSet;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.culturegraph.clustering.algorithm.core.*;
-import org.culturegraph.clustering.labelencoder.core.entity.EnumeratingLabelEncoder;
-import org.culturegraph.clustering.labelencoder.core.entity.LabelEncoder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import org.culturegraph.clustering.algorithm.core.AdjacencyListElement;
+import org.culturegraph.clustering.algorithm.core.Algorithm;
+import org.culturegraph.clustering.algorithm.core.EncodedNode;
+import org.culturegraph.clustering.algorithm.core.Node;
+import org.culturegraph.clustering.algorithm.core.ProcedureException;
+import org.culturegraph.clustering.algorithm.core.StepException;
 import org.culturegraph.clustering.graph.core.abstractentity.BipartiteGraph;
-import org.culturegraph.clustering.labelencoder.plugin.ArrayLabelEncoder;
+import org.culturegraph.clustering.graph.core.abstractentity.LinkedCRSMatrix;
+import org.culturegraph.clustering.graph.plugin.GraphMLExporter;
 import org.culturegraph.clustering.io.plugin.CompressedOutputStream;
 import org.culturegraph.clustering.io.plugin.DecompressedInputStream;
-
-import gnu.trove.iterator.TLongIterator;
-import gnu.trove.set.hash.TLongHashSet;
+import org.culturegraph.clustering.labelencoder.core.entity.EnumeratingLabelEncoder;
+import org.culturegraph.clustering.labelencoder.core.entity.LabelEncoder;
+import org.culturegraph.clustering.labelencoder.plugin.ArrayLabelEncoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ClusterAlgorithm implements Algorithm
 {
@@ -41,10 +58,7 @@ public class ClusterAlgorithm implements Algorithm
 
     public ClusterAlgorithm(File input, File output)
     {
-        this.input = input;
-        this.output = output;
-        this.compressOutput = true;
-        this.minimumComponentSize = 1;
+        this(input, output, true, 1);
     }
 
     public ClusterAlgorithm(File input, File output, boolean compressOutput, int minimumComponentSize)
@@ -207,6 +221,46 @@ public class ClusterAlgorithm implements Algorithm
         childNodeLabelEncoder = null;
     }
 
+    private void exportEdges(GraphMLExporter exporter, BipartiteGraph graph) throws IOException {
+        int edgeId = 0;
+        int componentId = 0;
+
+        Iterator<TIntSet> componentIterator = graph.iterator();
+        while (componentIterator.hasNext()) {
+            componentId += 1;
+            TIntSet component = componentIterator.next();
+            LinkedCRSMatrix matrix = graph.getMatrix();
+            for(TIntIterator iter = component.iterator(); iter.hasNext(); ) {
+                int target = iter.next();
+
+                int start = matrix.getRowPtr()[target];
+                int offset = matrix.getRowPtr()[target + 1];
+                int span = offset - start;
+                for (int i = 0; i < span; i++) {
+                    int idx = start + i;
+                    int source = matrix.getColInd()[idx];
+                    exporter.addEdge(edgeId++, "m" + source, "n" + target, componentId);
+                }
+            }
+        }
+    }
+
+    private void exportNodes(GraphMLExporter exporter, Iterator<EncodedNode> encodedNodeIterator) throws IOException {
+        for (int nodeId = 0; nodeId < connectedComponents.length; nodeId++)
+        {
+            if (!encodedNodeIterator.hasNext())
+            {
+                if (LOG.isWarnEnabled()) LOG.warn("Ended prematurely!");
+                break;
+            }
+
+            EncodedNode encodedNode = encodedNodeIterator.next();
+            int clusterId = connectedComponents[nodeId];
+
+            exporter.addNode("n" + encodedNode.getId(), encodedNode.getLabel(), clusterId);
+        }
+    }
+
     private void relabelClusteringOutputWithTableForEncodedParentNodesAndWriteOutput() throws IOException
     {
         if (LOG.isInfoEnabled()) LOG.info("Decoding output ...");
@@ -218,17 +272,18 @@ public class ClusterAlgorithm implements Algorithm
              OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8);
              BufferedWriter output = new BufferedWriter(outputStreamWriter))
         {
+            GraphMLExporter exporter = new GraphMLExporter(output);
+            exporter.start();
+
             Iterator<EncodedNode> encodedNodeIterator = decodingTableReader.lines()
                     .map(EncodedNode::parse)
                     .iterator();
 
-            for (int nodeId = 0; nodeId < connectedComponents.length; nodeId++)
-            {
-                if (!encodedNodeIterator.hasNext())
-                {
-                    LOG.warn("Decoding table ended prematurely!");
-                    break;
-                }
+            exportNodes(exporter, encodedNodeIterator);
+            connectedComponents = null;
+            exportEdges(exporter, graph);
+            exporter.end();
+        }
 
         if (LOG.isInfoEnabled()) {
             LOG.info("Decoding output completed.");
@@ -280,7 +335,7 @@ public class ClusterAlgorithm implements Algorithm
 
             List<EncodedNode> encodedChildNodes = adj.getNeighbourhood().stream()
                     .map(Node::getLabel)
-                    .map(label -> new EncodedNode(label, childNodeLabelEncoder.transform(label)))
+                    .map(label -> new EncodedNode(label, startWithOne + childNodeLabelEncoder.transform(label)))
                     .collect(Collectors.toList());
 
             return Stream.concat(Stream.of(encodedParentNode), encodedChildNodes.stream())
@@ -317,7 +372,8 @@ public class ClusterAlgorithm implements Algorithm
              InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
              BufferedReader bufferedReader = new BufferedReader(inputStreamReader))
         {
-            Iterator<String> encodedInputIterator = bufferedReader.lines().iterator();
+            Iterator<String> encodedInputIterator = bufferedReader.lines()
+                    .iterator();
             graph = BipartiteGraph.fromAdjacencyList(encodedInputIterator);
         }
 
