@@ -29,15 +29,6 @@ Run the following command to construct a jar with dependencies.
 gradlew test fatJar
 ----
 
-=== Script
-
-The `scripts` folder contains the Groovy Script `GraphCluster.groovy` that provides a simple CLI wrapper.
-The script uses Groovy's link:http://docs.groovy-lang.org/latest/html/documentation/grape.html[Grape] dependency management to download all dependencies and functions standalone.
-
-You just need to install link:http://groovy-lang.org/[Groovy 2.5.0].
-
-Run `scripts/GraphCluster.groovy -h` for more details.
-
 == Command Line Client
 
 === Example
@@ -47,26 +38,67 @@ Parent and child nodes belong to distinct sets of nodes that only share connecti
 
 The file `graph.txt` represent a graph as a adjacency list has the schema `PARENT CHILD [... CHILD]` for each line:
 
+[source,csv]
 ----
 A a b c
 B a
 C f
 ----
 
+Compute the connected components:
+
+[source,bash]
 ----
 java -Xmx1G -jar clustering-cli-VERSION.jar -o mapping.txt graph.txt
 ----
 
-The resulting mapping tags each parent node with an number.
-All nodes that share the same number form a cluster.
+TIP: For large problem instances, you need to tweak the JVM Memory option `-Xmx`.
 
+
+The resulting link:http://graphml.graphdrawing.org/[GraphML] file:
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns
+        http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+<key id="d0" for="node" attr.name="label" attr.type="string"/>
+<key id="d1" for="all" attr.name="component" attr.type="int"/>
+<graph id="G" edgedefault="undirected" parse.order="nodesfirst">
+<node id="n0"><data key="d0">A</data><data key="d1">1</data></node>
+<node id="n1"><data key="d0">B</data><data key="d1">1</data></node>
+<node id="n2"><data key="d0">C</data><data key="d1">2</data></node>
+<edge id="e0" source="m0" target="n1"><data key="d1">1</data></edge>
+<edge id="e1" source="m0" target="n0"><data key="d1">1</data></edge>
+<edge id="e2" source="m1" target="n0"><data key="d1">1</data></edge>
+<edge id="e3" source="m2" target="n0"><data key="d1">1</data></edge>
+<edge id="e4" source="m3" target="n2"><data key="d1">2</data></edge>
+</graph>
+</graphml>
+----
+
+Graph visualization (made with link:https://gephi.org/[Gephi]):
+
+image::assets/example-graph.png[Graph Visualization]
+
+The result graphml file contains a component number for each node *v* in *V* .
+All nodes that share the same component number form a cluster.
+
+You may extract the node to component mapping with:
+
+[source,bash]
+----
+cat g.graphml | grep "^<node" | sed -n 's:.*<data.*>\(.*\)</data><data.*>\(.*\)</data>.*:\1 \2:p'
+----
+
+[source,csv]
 ----
 A 1
 B 1
 C 2
 ----
-
-TIP: For large problem instances, you need to tweak the JVM Memory option `-Xmx`.
 
 === Usage
 
@@ -87,13 +119,34 @@ Parameters:
 
 Options:
 
-  -o, --output=FILE           Output file for node-cluster-mapping.
+  -o, --output=FILE           GraphML output file.
   -c                          Compress output with gzip.
   -s, --size=NUM              Minimum component size.
                                 Default: 0
   -h, --help                  Display this help message.
   -V, --version               Display version info.
 ----
+
+==== Logging
+
+This project uses the link:https://www.slf4j.org/api/org/slf4j/impl/SimpleLogger.html[Slf4j SimpleLogger] implementation for logging.
+
+Any change in the logging behaviour needs to be passed by System Properties before
+running the program.
+
+Example:
+
+[source,bash]
+----
+java -Dorg.slf4j.simpleLogger.logFile=/var/log/messages\
+ -Dorg.slf4j.simpleLogger.defaultLogLevel=error\
+ -jar <JAR> -c -o output.graphml.gz input.csv
+----
+
+SimpleLogger Properties:
+
+* Use `org.slf4j.simpleLogger.logFile` for setting a output file (Default: System.err).
+* Use `org.slf4j.simpleLogger.defaultLogLevel` for setting a log level (Default: info).
 
 == Good To Know
 
@@ -106,6 +159,7 @@ assigned to the component "__-1__".
 The procedure creates the following temporary files during a run.
 
 .Table Temporary Files
+[cols="1,2"]
 |===
 |Name | Description
 
