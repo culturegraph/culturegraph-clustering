@@ -64,4 +64,16 @@ public class CRSMatrix {
         }
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "CRSMatrix{" + "\n" +
+                "val=" + Arrays.toString(val) + "\n" +
+                "rows=" + rows + "\n" +
+                "columns=" + columns + "\n" +
+                "capacity=" + capacity + "\n" +
+                "colInd=" + Arrays.toString(colInd) + "\n" +
+                "rowPtr=" + Arrays.toString(rowPtr) + "\n" +
+                '}';
+    }
 }
