@@ -1,8 +1,7 @@
 package org.culturegraph.clustering.graph.core.abstractentity;
 
-import java.util.LinkedList;
-import java.util.List;
-
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
 
 /**
@@ -30,16 +29,14 @@ public class LinkedCRSMatrix extends CRSMatrix {
      * @param colIndIdx A column index.
      * @return A list of all elements in the column.
      */
-    public List<Integer> getColumn(int colIndIdx) {
-        List<Integer> result = new LinkedList<>();
-
+    public TIntList getColumn(int colIndIdx) {
+        TIntList result = new TIntArrayList();
         int idx = colIndIdx;
         while (true) {
             result.add(val[idx]);
             idx = columnNextLink[idx];
             if (idx == colIndIdx) break;
         }
-
         return result;
     }
 
