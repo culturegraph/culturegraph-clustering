@@ -309,4 +309,51 @@ public class BipartiteGraph {
             return bfs;
         }
     }
+
+    public void exportAsGraphML(Writer writer) throws IOException {
+        String declaration = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "\n";
+        writer.write(declaration);
+
+        String root = "<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\"  \n" +
+                "    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+                "    xsi:schemaLocation=\"http://graphml.graphdrawing.org/xmlns\n" +
+                "    http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd\">" + "\n";
+        writer.write(root);
+
+        String graph = "<graph id=\"G\" edgedefault=\"undirected\" " +
+                "parse.nodes=" + "\"" + rows + "\" " +
+                "parse.order=\"nodesfirst\">" + "\n";
+        writer.write(graph);
+
+        for (int n = 0; n < rows; n++) {
+            String node = "<node id=\"n" + n + "\"/>";
+            writer.write(node + "\n");
+        }
+
+        for (int m = 0; m < columns; m++) {
+            String node = "<node id=\"m" + m + "\"/>";
+            writer.write(node + "\n");
+        }
+
+        int edgeId = 0;
+        int col = 0;
+
+        int[] colInd = matrix.getColInd();
+        for (int i = 0; i < colInd.length; i++) {
+            int source = colInd[i];
+            if (source != col) continue;
+            col += 1;
+
+            TIntList targets = matrix.getColumn(i);
+            for (TIntIterator iter = targets.iterator(); iter.hasNext(); ) {
+                int target = iter.next() - 1;
+
+                String edge = "<edge id=\"e" + edgeId++ + "\" source=\"m" + source + "\" target=\"n" + target + "\" />";
+                writer.write(edge + "\n");
+            }
+        }
+
+        writer.write("</graph>\n");
+        writer.write("</graphml>");
+    }
 }
