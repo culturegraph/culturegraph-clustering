@@ -1,0 +1,9 @@
+% TestCase: Line in a bipartite Graph.
+%
+% Header: Rows Columns Capacity
+% Body: RowId ColumnIds [...]
+# 4 4 7
+1 1 2
+2 2 3
+3 3 4
+4 4
