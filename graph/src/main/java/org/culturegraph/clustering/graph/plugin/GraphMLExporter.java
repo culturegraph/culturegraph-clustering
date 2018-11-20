@@ -18,10 +18,7 @@ public class GraphMLExporter {
     }
 
     private String openGraphml() {
-        return "<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\"  \n" +
-                "      xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n" +
-                "      xsi:schemaLocation=\"http://graphml.graphdrawing.org/xmlns \n" +
-                "        http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd\">";
+        return "<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd\">";
     }
 
     private String closeGraphml() {
