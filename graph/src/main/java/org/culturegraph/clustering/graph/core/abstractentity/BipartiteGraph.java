@@ -1,14 +1,23 @@
 package org.culturegraph.clustering.graph.core.abstractentity;
 
-import com.opencsv.CSVParser;
-import com.opencsv.CSVParserBuilder;
 import gnu.trove.iterator.TIntIterator;
+import gnu.trove.list.TIntList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import org.culturegraph.clustering.graph.core.entity.GraphHeader;
 
 import java.io.IOException;
-import java.util.*;
+import java.io.Writer;
+import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.Queue;
+
+import org.culturegraph.clustering.graph.core.entity.AdjacencyList;
+import org.culturegraph.clustering.graph.core.entity.GraphHeader;
+
+import com.opencsv.CSVParser;
+import com.opencsv.CSVParserBuilder;
 
 /**
  * Class that represents a bipartite graph.
@@ -63,7 +72,7 @@ public class BipartiteGraph {
      * @param input A file iterator.
      * @return A bipartite graph object.
      */
-    static public BipartiteGraph fromAdjacencyList(Iterator<String> input)
+    static public BipartiteGraph fromAdjacencyList(Iterator<String> input) throws IOException
     {
         // Matrix Properties
         int rows = 0;
@@ -110,35 +119,22 @@ public class BipartiteGraph {
                 throw new NoSuchElementException("Missing header. Expected '# <ROWS> <COLUMNS> <NON-ZERO-ENTRIES>'.");
             }
 
-            String[] token;
-
-            try
-            {
-                token = parser.parseLine(line);
-            }
-            catch (IOException e)
-            {
-                throw new IllegalArgumentException("Could not parse line " + "'" + line + "'", e);
-            }
-
-            int numberOfToken = token.length;
-
-            String firstNumber = token[0];
-            int rowIdx = Integer.parseInt(firstNumber);
+            AdjacencyList adj = AdjacencyList.of(parser.parseLine(line));
+            int nodeId = adj.getNode();
+            int neighbourhoodSize = adj.getNeighbourhood().length;
 
             int startWithZero = -1;
-            int numberOfNodeNeighbours = numberOfToken - 1;
-            for (int i = 1; i < numberOfToken; i++) {
-                String followingNumber = token[i];
-                val[capacity] = rowIdx;
-                colInd[capacity] = Integer.parseInt(followingNumber) + startWithZero;
+            for (int neighbour = 0; neighbour < neighbourhoodSize; neighbour++) {
+                val[capacity] = nodeId;
+                colInd[capacity] = adj.getNeighbourhood()[neighbour] + startWithZero;
                 capacity += 1;
             }
 
-            rowPtr[rowIdx] = rowPtr[rowIdx + startWithZero] + numberOfNodeNeighbours;
+            rowPtr[nodeId] = rowPtr[nodeId + startWithZero] + neighbourhoodSize;
         }
 
-        return new BipartiteGraph(new LinkedCRSMatrix(rows, columns, noOfNonZeroEntries, val, colInd, rowPtr));
+        LinkedCRSMatrix matrix = new LinkedCRSMatrix(rows, columns, noOfNonZeroEntries, val, colInd, rowPtr);
+        return new BipartiteGraph(matrix);
     }
 
     /**
