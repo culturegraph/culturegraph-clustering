@@ -25,7 +25,7 @@ public class ClusterCommand
     @CommandLine.Parameters(arity = "1", paramLabel = "INPUT", description = "Input adjacency list (plain text or gzip).")
     public File inputAdjacencyList;
 
-    @Option(names = {"-o", "--output"}, paramLabel = "FILE", description = "Output file for node-cluster-mapping.", required = true)
+    @Option(names = {"-o", "--output"}, paramLabel = "FILE", description = "GraphML Output file.", required = true)
     public File outputMapping;
 
     @Option(names = "-c", description = "Compress output with gzip.")
