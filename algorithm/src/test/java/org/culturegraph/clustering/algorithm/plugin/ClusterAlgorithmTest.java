@@ -53,10 +53,7 @@ public class ClusterAlgorithmTest
 
         String clustering = readFile(output);
         String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                "<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\"  \n" +
-                "      xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-                "      xsi:schemaLocation=\"http://graphml.graphdrawing.org/xmlns \n" +
-                "        http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd\">\n" +
+                "<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd\">" + "\n" +
                 "<key id=\"d0\" for=\"node\" attr.name=\"label\" attr.type=\"string\"/>\n" +
                 "<key id=\"d1\" for=\"all\" attr.name=\"component\" attr.type=\"int\"/>\n" +
                 "<graph id=\"G\" edgedefault=\"undirected\" parse.order=\"nodesfirst\">\n" +
