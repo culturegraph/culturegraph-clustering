@@ -119,8 +119,8 @@ Parameters:
 
 Options:
 
-  -o, --output=FILE           GraphML output file.
-  -c                          Compress output with gzip.
+  -o, --output=FILE           GraphML file.
+  -c, --compress              Compress output with gzip.
   -s, --size=NUM              Minimum component size.
                                 Default: 0
   -h, --help                  Display this help message.
