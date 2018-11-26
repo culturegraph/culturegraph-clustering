@@ -28,7 +28,7 @@ public class ClusterCommand
     @Option(names = {"-o", "--output"}, paramLabel = "FILE", description = "GraphML Output file.", required = true)
     public File outputMapping;
 
-    @Option(names = "-c", description = "Compress output with gzip.")
+    @Option(names = {"-c", "--compress"}, description = "Compress output with gzip.")
     public boolean compressOutput;
 
     @Option(names = {"-s", "--size"}, paramLabel = "NUM", description = "Minimum component size.")
